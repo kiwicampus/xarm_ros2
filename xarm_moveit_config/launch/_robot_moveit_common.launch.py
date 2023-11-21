@@ -187,6 +187,17 @@ def launch_setup(context, *args, **kwargs):
         # },
     }
 
+    warehouse_host = "/workspace/arm/configs/warehouse_db.sqlite"
+    warehouse_ros_config = {
+    # For warehouse_ros_sqlite
+        "warehouse_plugin": "warehouse_ros_sqlite::DatabaseConnection",
+        "warehouse_host": warehouse_host,
+        # For warehouse_ros_mongodb use the following instead
+        # "warehouse_port": 33829,
+        # "warehouse_host": "localhost",
+        # "warehouse_plugin": "warehouse_ros_mongo::MongoDatabaseConnection",
+    }
+    
     # Start the actual move_group node/action server
     move_group_node = Node(
         package='moveit_ros_move_group',
@@ -199,6 +210,7 @@ def launch_setup(context, *args, **kwargs):
             plan_execution,
             moveit_controllers,
             planning_scene_monitor_parameters,
+            warehouse_ros_config,
             {'use_sim_time': use_sim_time},
         ],
     )
@@ -215,6 +227,7 @@ def launch_setup(context, *args, **kwargs):
         parameters=[
             robot_description_parameters,
             ompl_planning_pipeline_config,
+            warehouse_ros_config,
             {'use_sim_time': use_sim_time},
         ],
         remappings=[
