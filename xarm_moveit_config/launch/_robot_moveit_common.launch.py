@@ -39,6 +39,9 @@ def launch_setup(context, *args, **kwargs):
     add_d435i_links = LaunchConfiguration('add_d435i_links', default=True)
     model1300 = LaunchConfiguration('model1300', default=False)
 
+    use_octomap_updater = LaunchConfiguration('use_octomap_updater', default=False)
+    octomap_parameters = LaunchConfiguration('octomap_parameters', default="")
+
     attach_to = LaunchConfiguration('attach_to', default='world')
     attach_xyz = LaunchConfiguration('attach_xyz', default='"0 0 0"')
     attach_rpy = LaunchConfiguration('attach_rpy', default='"0 0 0"')
@@ -197,22 +200,27 @@ def launch_setup(context, *args, **kwargs):
         # "warehouse_host": "localhost",
         # "warehouse_plugin": "warehouse_ros_mongo::MongoDatabaseConnection",
     }
-    
+
+    move_group_parameters = [
+        robot_description_parameters,
+        ompl_planning_pipeline_config,
+        trajectory_execution,
+        plan_execution,
+        moveit_controllers,
+        planning_scene_monitor_parameters,
+        warehouse_ros_config,
+        {'use_sim_time': use_sim_time},
+    ]
+
+    if use_octomap_updater.perform(context) in ("True", "true", "1"):
+        move_group_parameters.append(octomap_parameters.perform(context))
+
     # Start the actual move_group node/action server
     move_group_node = Node(
         package='moveit_ros_move_group',
         executable='move_group',
         output='screen',
-        parameters=[
-            robot_description_parameters,
-            ompl_planning_pipeline_config,
-            trajectory_execution,
-            plan_execution,
-            moveit_controllers,
-            planning_scene_monitor_parameters,
-            warehouse_ros_config,
-            {'use_sim_time': use_sim_time},
-        ],
+        parameters=move_group_parameters,
     )
 
     # rviz with moveit configuration
