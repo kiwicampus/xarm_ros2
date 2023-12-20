@@ -58,6 +58,7 @@ def launch_setup(context, *args, **kwargs):
     geometry_mesh_origin_rpy = LaunchConfiguration('geometry_mesh_origin_rpy', default='"0 0 0"')
     geometry_mesh_tcp_xyz = LaunchConfiguration('geometry_mesh_tcp_xyz', default='"0 0 0"')
     geometry_mesh_tcp_rpy = LaunchConfiguration('geometry_mesh_tcp_rpy', default='"0 0 0"')
+    rviz_config = LaunchConfiguration('rviz_config_file', default='')
 
     use_sim_time = LaunchConfiguration('use_sim_time', default=False)
 
@@ -224,8 +225,10 @@ def launch_setup(context, *args, **kwargs):
     )
 
     # rviz with moveit configuration
-    # rviz_config_file = PathJoinSubstitution([FindPackageShare(moveit_config_package_name), 'config', xarm_type, 'planner.rviz' if no_gui_ctrl.perform(context) == 'true' else 'moveit.rviz'])
-    rviz_config_file = PathJoinSubstitution([FindPackageShare(moveit_config_package_name), 'rviz', 'planner.rviz' if no_gui_ctrl.perform(context) == 'true' else 'moveit.rviz'])
+    rviz_config_file = rviz_config.perform(context)
+    if len(rviz_config_file) == 0:
+        rviz_config_file = PathJoinSubstitution([FindPackageShare(moveit_config_package_name), 'rviz', 'planner.rviz' if no_gui_ctrl.perform(context) == 'true' else 'moveit.rviz'])
+    
     rviz2_node = Node(
         package='rviz2',
         executable='rviz2',
