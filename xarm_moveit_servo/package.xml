@@ -22,7 +22,6 @@
   <depend>xarm_controller</depend>
   <depend>xarm_moveit_config</depend>
 
-  <exec_depend>rviz2</exec_depend>
   <exec_depend>launch</exec_depend>
   <exec_depend>launch_ros</exec_depend>
   <exec_depend>joy</exec_depend>

@@ -19,7 +19,7 @@
   <depend>xarm_sdk</depend>
   <depend>xarm_description</depend>
 
-  <exec_depend>rviz2</exec_depend>
+
   <exec_depend>xacro</exec_depend>
   <exec_depend>urdf</exec_depend>
   <exec_depend>launch</exec_depend>
