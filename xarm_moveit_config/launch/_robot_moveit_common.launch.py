@@ -30,6 +30,7 @@ def launch_setup(context, *args, **kwargs):
     dof = LaunchConfiguration('dof', default=7)
     robot_type = LaunchConfiguration('robot_type', default='xarm')
     no_gui_ctrl = LaunchConfiguration('no_gui_ctrl', default=False)
+    launch_rviz = LaunchConfiguration('launch_rviz', default=True)
     ros2_control_plugin = LaunchConfiguration('ros2_control_plugin', default='uf_robot_hardware/UFRobotFakeSystemHardware')
     controllers_name = LaunchConfiguration('controllers_name', default='fake_controllers')
     moveit_controller_manager_key = LaunchConfiguration('moveit_controller_manager_key', default='moveit_fake_controller_manager')
@@ -262,15 +263,18 @@ def launch_setup(context, *args, **kwargs):
         parameters=[{'use_sim_time': use_sim_time}],
     )
 
-    return [
+    node_list = [
         RegisterEventHandler(event_handler=OnProcessExit(
             target_action=rviz2_node,
             on_exit=[EmitEvent(event=Shutdown())]
         )),
-        rviz2_node,
         static_tf,
         move_group_node,
     ]
+    if launch_rviz.perform(context=context) in ["true", "True"]:
+        node_list.append(rviz2_node)
+
+    return node_list
 
 
 def generate_launch_description():
