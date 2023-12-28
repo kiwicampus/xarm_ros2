@@ -39,6 +39,9 @@ def launch_setup(context, *args, **kwargs):
     add_d435i_links = LaunchConfiguration('add_d435i_links', default=True)
     model1300 = LaunchConfiguration('model1300', default=False)
 
+    use_octomap_updater = LaunchConfiguration('use_octomap_updater', default=False)
+    octomap_parameters = LaunchConfiguration('octomap_parameters', default="")
+
     attach_to = LaunchConfiguration('attach_to', default='world')
     attach_xyz = LaunchConfiguration('attach_xyz', default='"0 0 0"')
     attach_rpy = LaunchConfiguration('attach_rpy', default='"0 0 0"')
@@ -55,6 +58,7 @@ def launch_setup(context, *args, **kwargs):
     geometry_mesh_origin_rpy = LaunchConfiguration('geometry_mesh_origin_rpy', default='"0 0 0"')
     geometry_mesh_tcp_xyz = LaunchConfiguration('geometry_mesh_tcp_xyz', default='"0 0 0"')
     geometry_mesh_tcp_rpy = LaunchConfiguration('geometry_mesh_tcp_rpy', default='"0 0 0"')
+    rviz_config = LaunchConfiguration('rviz_config_file', default='')
 
     use_sim_time = LaunchConfiguration('use_sim_time', default=False)
 
@@ -197,27 +201,34 @@ def launch_setup(context, *args, **kwargs):
         # "warehouse_host": "localhost",
         # "warehouse_plugin": "warehouse_ros_mongo::MongoDatabaseConnection",
     }
-    
+
+    move_group_parameters = [
+        robot_description_parameters,
+        ompl_planning_pipeline_config,
+        trajectory_execution,
+        plan_execution,
+        moveit_controllers,
+        planning_scene_monitor_parameters,
+        warehouse_ros_config,
+        {'use_sim_time': use_sim_time},
+    ]
+
+    if use_octomap_updater.perform(context) in ("True", "true", "1"):
+        move_group_parameters.append(octomap_parameters.perform(context))
+
     # Start the actual move_group node/action server
     move_group_node = Node(
         package='moveit_ros_move_group',
         executable='move_group',
         output='screen',
-        parameters=[
-            robot_description_parameters,
-            ompl_planning_pipeline_config,
-            trajectory_execution,
-            plan_execution,
-            moveit_controllers,
-            planning_scene_monitor_parameters,
-            warehouse_ros_config,
-            {'use_sim_time': use_sim_time},
-        ],
+        parameters=move_group_parameters,
     )
 
     # rviz with moveit configuration
-    # rviz_config_file = PathJoinSubstitution([FindPackageShare(moveit_config_package_name), 'config', xarm_type, 'planner.rviz' if no_gui_ctrl.perform(context) == 'true' else 'moveit.rviz'])
-    rviz_config_file = PathJoinSubstitution([FindPackageShare(moveit_config_package_name), 'rviz', 'planner.rviz' if no_gui_ctrl.perform(context) == 'true' else 'moveit.rviz'])
+    rviz_config_file = rviz_config.perform(context)
+    if len(rviz_config_file) == 0:
+        rviz_config_file = PathJoinSubstitution([FindPackageShare(moveit_config_package_name), 'rviz', 'planner.rviz' if no_gui_ctrl.perform(context) == 'true' else 'moveit.rviz'])
+    
     rviz2_node = Node(
         package='rviz2',
         executable='rviz2',
