@@ -122,7 +122,7 @@ def launch_setup(context, *args, **kwargs):
         os.path.join(get_package_share_directory('xarm_api'), 'config', 'xarm_user_params.yaml'),
         LaunchConfiguration('ros_namespace', default='').perform(context), node_name='ufactory_driver'
     )
-
+    print("?:D", flush=True)
     # ros2 control node
     ros2_control_node = Node(
         package='controller_manager',
@@ -134,7 +134,7 @@ def launch_setup(context, *args, **kwargs):
         ],
         output='screen',
         respawn=respawn_nodes,
-        respawn_delay=respawn_delay,
+        respawn_delay=float(respawn_delay.perform(context=context)),
     )
 
     return [
